@@ -132,6 +132,10 @@
         options.colors = opts.colors;
       }
 
+      if (opts.dateFormat) {
+        options.dateFormat = opts.dateFormat;
+      }
+
       // merge library last
       options = merge(options, opts.library || {});
 
