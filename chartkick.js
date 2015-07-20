@@ -1,8 +1,9 @@
 /*
  * Chartkick.js
  * Create beautiful Javascript charts with minimal code
- * https://github.com/ankane/chartkick.js
- * v1.3.0
+ * https://github.com/buren/chartkick.js
+ * Continuation on https://github.com/ankane/chartkick.js
+ * v1.4.0-buren
  * MIT License
  */
 
@@ -440,7 +441,7 @@
         options.series = newSeries;
 
         new Highcharts.Chart(options);
-      }
+      };
 
       var self = this;
 
@@ -467,7 +468,7 @@
         var cb, call;
         for (var i = 0; i < callbacks.length; i++) {
           cb = callbacks[i];
-          call = google.visualization && ((cb.pack == "corechart" && google.visualization.LineChart) || (cb.pack == "timeline" && google.visualization.Timeline))
+          call = google.visualization && ((cb.pack == "corechart" && google.visualization.LineChart) || (cb.pack == "timeline" && google.visualization.Timeline));
           if (call) {
             cb.callback();
             callbacks.splice(i, 1);
@@ -676,7 +677,7 @@
             if(type == "column"){
               type = "bars";
             }
-            seriesOptions.push({type: type})
+            seriesOptions.push({type: type});
           }
           var chartOptions = {
             series: seriesOptions
