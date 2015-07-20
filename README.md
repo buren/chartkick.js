@@ -117,6 +117,12 @@ Discrete axis
 new Chartkick.LineChart("chart-1", data, {"discrete": true});
 ```
 
+Date format
+
+```javascript
+new Chartkick.LineChart("chart-1", data, {"dateFormat": 'yyyy-MM-dd'});
+```
+
 You can pass options directly to the charting library with:
 
 ```javascript
