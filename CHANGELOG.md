@@ -1,3 +1,8 @@
+## 1.4.0-buren
+
+- Date format option
+- ComboChart support
+
 ## 1.3.0
 
 - Added timelines

@@ -45,6 +45,12 @@ Bar chart
 new Chartkick.BarChart("chart-1", [["Work", 32],["Play", 1492]]);
 ```
 
+Combo chart
+
+```javascript
+new Chartkick.ComboChart("chart-1", [["Work", 32],["Play", 1492]], types: ["line", "column"]);
+```
+
 Area chart
 
 ```javascript
@@ -111,6 +117,12 @@ Discrete axis
 new Chartkick.LineChart("chart-1", data, {"discrete": true});
 ```
 
+Date format
+
+```javascript
+new Chartkick.LineChart("chart-1", data, {"dateFormat": 'yyyy-MM-dd'});
+```
+
 You can pass options directly to the charting library with:
 
 ```javascript
@@ -130,6 +142,31 @@ Times can be a `Date`, a timestamp, or a string (strings are parsed)
 
 ```javascript
 new Chartkick.LineChart("chart-1", [[new Date(), 5],[1368174456, 4],["2013-05-07 00:00:00 UTC", 7]]);
+```
+
+### Update charts
+
+Single chart:
+```javascript
+Chartkick.updateChart('chart-1'); // Update chart-1 (assumes that chart-1 has a remote URL)
+Chartkick.updateChart('chart-1', data); // Update chart-1 with data
+Chartkick.updateChart('chart-1', null, {colors: ['red', 'green']}); // Update chart-1, from current dataSource but with new options
+```
+
+All charts:
+```javascript
+Chartkick.updateAllCharts(); // Updates all charts with remote URLs
+Chartkick.updateAllCharts(function(chart, isRemote) {
+  if (isRemote) {
+    return {data: chart.dataSource + '?some_param=abc'};
+  }
+});
+// Update all charts with new options (charts with remote URL with re-fetch their data)
+Chartkick.updateAllCharts(function(chart, isRemote) {
+  return {
+    options: {colors: ['red', 'green']}
+  };
+});
 ```
 
 ## Installation

@@ -1,8 +1,9 @@
 /*
  * Chartkick.js
  * Create beautiful Javascript charts with minimal code
- * https://github.com/ankane/chartkick.js
- * v1.3.0
+ * https://github.com/buren/chartkick.js
+ * Continuation on https://github.com/ankane/chartkick.js
+ * v1.4.0-buren
  * MIT License
  */
 
@@ -34,6 +35,10 @@
 
   function isPlainObject(variable) {
     return !isFunction(variable) && variable instanceof Object;
+  }
+
+  function isRemoteUrl(dataSource) {
+    return typeof dataSource === "string";
   }
 
   // https://github.com/madrobby/zepto/blob/master/src/zepto.js
@@ -140,6 +145,10 @@
         options.colors = opts.colors;
       }
 
+      if (opts.dateFormat) {
+        options.dateFormat = opts.dateFormat;
+      }
+
       // merge library last
       options = merge(options, opts.library || {});
 
@@ -183,7 +192,7 @@
   }
 
   function fetchDataSource(chart, callback) {
-    if (typeof chart.dataSource === "string") {
+    if (isRemoteUrl(chart.dataSource)) {
       getJSON(chart.element, chart.dataSource, function (data, textStatus, jqXHR) {
         chart.data = data;
         errorCatcher(chart, callback);
@@ -338,6 +347,11 @@
           };
         }
         options.series = series;
+        if (options.dateFormat) {
+          options.xAxis.labels.formatter = function (){
+            return Highcharts.dateFormat(options.dateFormat, this.value);
+          };
+        }
         new Highcharts.Chart(options);
       };
 
@@ -400,6 +414,52 @@
         new Highcharts.Chart(options);
       };
 
+      this.renderComboChart = function (chart, chartType) {
+        var chartType = chartType || "column";
+        var series = chart.data;
+        var types = chart.options.types;
+        var options = jsOptions(series, chart.options), i, j, s, d, rows = [];
+        // options.chart.type = chartType;
+        options.chart.renderTo = chart.element.id;
+
+        for (i = 0; i < series.length; i++) {
+          s = series[i];
+
+          for (j = 0; j < s.data.length; j++) {
+            d = s.data[j];
+            if (!rows[d[0]]) {
+              rows[d[0]] = new Array(series.length);
+            }
+            rows[d[0]][i] = d[1];
+          }
+        }
+
+        var categories = [];
+        for (i in rows) {
+          if (rows.hasOwnProperty(i)) {
+            categories.push(i);
+          }
+        }
+        options.xAxis.categories = categories;
+
+        var newSeries = [];
+        for (i = 0; i < series.length; i++) {
+          d = [];
+          for (j = 0; j < categories.length; j++) {
+            d.push(rows[categories[j]][i] || 0);
+          }
+
+          newSeries.push({
+            name: series[i].name,
+            data: d,
+            type: types[i]
+          });
+        }
+        options.series = newSeries;
+
+        new Highcharts.Chart(options);
+      };
+
       var self = this;
 
       this.renderBarChart = function (chart) {
@@ -425,7 +485,7 @@
         var cb, call;
         for (var i = 0; i < callbacks.length; i++) {
           cb = callbacks[i];
-          call = google.visualization && ((cb.pack == "corechart" && google.visualization.LineChart) || (cb.pack == "timeline" && google.visualization.Timeline))
+          call = google.visualization && ((cb.pack == "corechart" && google.visualization.LineChart) || (cb.pack == "timeline" && google.visualization.Timeline));
           if (call) {
             cb.callback();
             callbacks.splice(i, 1);
@@ -631,6 +691,30 @@
         });
       };
 
+      this.renderComboChart = function (chart) {
+        waitForLoaded(function () {
+          var i, type, seriesOptions = [];
+          var types = chart.options.types;
+
+          for (i = 0; i < types.length; i++) {
+            type = types[i];
+            if(type == "column"){
+              type = "bars";
+            }
+            seriesOptions.push({type: type});
+          }
+          var chartOptions = {
+            series: seriesOptions
+          };
+          var options = jsOptionsFunc(defaultOptions, hideLegend, setBarMin, setBarMax, setStacked)(chart.data, chart.options, chartOptions);
+          var data = createDataTable(chart.data, "string");
+          chart.chart = new google.visualization.ComboChart(chart.element);
+          resize(function () {
+            chart.chart.draw(data, options);
+          });
+        });
+      };
+
       this.renderBarChart = function (chart) {
         waitForLoaded(function () {
           var chartOptions = {
@@ -694,7 +778,7 @@
           };
 
           if (chart.options.colors) {
-            chartOptions.colorAxis.colors = chart.options.colors;
+            chartOptions.colors = chart.options.colors;
           }
           var options = merge(merge(defaultOptions, chartOptions), chart.options.library || {});
 
@@ -794,6 +878,11 @@
     renderChart("ColumnChart", chart);
   }
 
+  function processComboData(chart) {
+    chart.data = processSeries(chart.data, chart.options, false);
+    renderChart("ComboChart", chart);
+  }
+
   function processPieData(chart) {
     chart.data = processSimple(chart.data);
     renderChart("PieChart", chart);
@@ -845,6 +934,9 @@
     BarChart: function (element, dataSource, opts) {
       setElement(this, element, dataSource, opts, processBarData);
     },
+    ComboChart: function (element, dataSource, opts) {
+      setElement(this, element, dataSource, opts, processComboData);
+    },
     AreaChart: function (element, dataSource, opts) {
       setElement(this, element, dataSource, opts, processAreaData);
     },
@@ -854,7 +946,52 @@
     Timeline: function (element, dataSource, opts) {
       setElement(this, element, dataSource, opts, processTimelineData);
     },
-    charts: {}
+    charts: {},
+    updateChart: function(chartId, dataSource, opts) {
+      var chart = Chartkick.charts[chartId];
+      var options;
+      var source;
+      if (chart === undefined) {
+        throw new Error("No chart found with id: " + chartId);
+      }
+
+      source = dataSource || chart.dataSource;
+      options = opts ? merge(chart.options, opts) : chart.options;
+
+      new chart.__proto__.constructor(chart.element.id, source, options);
+    },
+    updateAllCharts: function(callback) {
+      var charts = Chartkick.charts;
+      var chart;
+      var isRemote;
+      var chartProps;
+
+      var setChartProps = function(obj) {
+        var data = obj.data;
+        var opts = obj.options || {};
+
+        // If there is no data and options properties assume that obj is the data
+        if (!data && !opts) {
+          data = obj;
+        }
+
+        return {
+          options: opts,
+          data: data
+        };
+      }
+
+      for (var chartId in charts) {
+        chart = charts[chartId];
+        isRemote = isRemoteUrl(chart.dataSource);
+        if (isFunction(callback)) {
+          chartProps = setChartProps(callback(chart, isRemote));
+          Chartkick.updateChart(chartId, chartProps.data, chartProps.options);
+        } else if (isRemote) {
+          Chartkick.updateChart(chartId, chart.dataSource);
+        }
+      }
+    }
   };
 
   window.Chartkick = Chartkick;
