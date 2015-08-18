@@ -659,6 +659,31 @@
         });
       };
 
+      this.renderScatterChart = function (chart) {
+        waitForLoaded(function () {
+          var chartOptions;
+          if (chart.options.trendline) {
+            chartOptions = {
+              trendlines: {
+                0: {
+                  lineWidth: 2,
+                  pointSize: 0,
+                  opacity: 0.5,
+                  color: 'red'
+                }
+              },
+              lineWidth: 0
+            };
+          }
+          var options = jsOptions(chart.data, chart.options, chartOptions);
+          var data = createDataTable(chart.data, chart.options.discrete ? "string" : "datetime");
+          chart.chart = new google.visualization.ScatterChart(chart.element);
+          resize(function () {
+            chart.chart.draw(data, options);
+          });
+        });
+      };
+
       this.renderTimeline = function (chart) {
         waitForLoaded("timeline", function () {
           var chartOptions = {
@@ -707,7 +732,7 @@
   // process data
 
   function processSeries(series, opts, time) {
-    var i, j, data, r, key;
+    var i, j, data, r, key, val, raw;
 
     // see if one series or multiple
     if (!isArray(series) || typeof series[0] !== "object" || isArray(series[0])) {
@@ -719,6 +744,11 @@
     if (opts.discrete) {
       time = false;
     }
+    if (opts.raw) {
+      raw = true;
+      time = false;
+      opts.discrete = true;
+    }
 
     // right format
     for (i = 0; i < series.length; i++) {
@@ -726,8 +756,12 @@
       r = [];
       for (j = 0; j < data.length; j++) {
         key = data[j][0];
-        key = time ? toDate(key) : toStr(key);
-        r.push([key, toFloat(data[j][1])]);
+        val = data[j][1];
+        if (!raw) {
+          key = time ? toDate(key) : toStr(key);
+          val = toFloat(val);
+        }
+        r.push([key, val]);
       }
       if (time) {
         r.sort(sortByTime);
@@ -786,6 +820,11 @@
     renderChart("GeoChart", chart);
   }
 
+  function processScatterData(chart) {
+    chart.data = processSeries(chart.data, chart.options, true);
+    renderChart("ScatterChart", chart);
+  }
+
   function processTimelineData(chart) {
     chart.data = processTime(chart.data);
     renderChart("Timeline", chart);
@@ -822,6 +861,9 @@
     },
     GeoChart: function (element, dataSource, opts) {
       setElement(this, element, dataSource, opts, processGeoData);
+    },
+    ScatterChart: function (element, dataSource, opts) {
+      setElement(this, element, dataSource, opts, processScatterData);
     },
     Timeline: function (element, dataSource, opts) {
       setElement(this, element, dataSource, opts, processTimelineData);
