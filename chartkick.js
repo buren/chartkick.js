@@ -342,6 +342,26 @@
         new Highcharts.Chart(options);
       };
 
+      this.renderScatterChart = function (chart) {
+        var xTooltip = chart.options.xTooltip || "x";
+        var yTooltip = chart.options.yTooltip || "y";
+        var chartOptions = {
+          plotOptions: {
+            scatter: {
+              tooltip: {
+                pointFormat: xTooltip + ': <b>{point.y}</b><br/>' + yTooltip + ': <b>{point.x}</b>'
+              }
+            }
+          }
+        };
+        var options = jsOptions(chart.data, chart.options, chartOptions);
+        options.chart.type = 'scatter';
+        options.chart.renderTo = chart.element.id;
+        var data = chart.data;
+        options.series = chart.data;
+        new Highcharts.Chart(options);
+      };
+
       this.renderPieChart = function (chart) {
         var chartOptions = {};
         if (chart.options.colors) {
@@ -753,22 +773,10 @@
 
       this.renderScatterChart = function (chart) {
         waitForLoaded(function () {
-          var chartOptions;
-          if (chart.options.trendline) {
-            chartOptions = {
-              trendlines: {
-                0: {
-                  lineWidth: 2,
-                  pointSize: 0,
-                  opacity: 0.5,
-                  color: 'red'
-                }
-              },
-              lineWidth: 0
-            };
-          }
+          var chartOptions = {};
           var options = jsOptions(chart.data, chart.options, chartOptions);
           var data = createDataTable(chart.data, chart.options.discrete ? "string" : "datetime");
+
           chart.chart = new google.visualization.ScatterChart(chart.element);
           resize(function () {
             chart.chart.draw(data, options);
