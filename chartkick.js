@@ -1,9 +1,9 @@
 /*
  * Chartkick.js
  * Create beautiful Javascript charts with minimal code
- * https://github.com/buren/chartkick.js
- * Continuation on https://github.com/ankane/chartkick.js
- * v1.4.0-buren
+ * Original: https://github.com/ankane/chartkick.js
+ * Fork: https://github.com/buren/chartkick.js
+ * v1.5.0-buren
  * MIT License
  */
 
