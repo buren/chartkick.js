@@ -109,7 +109,12 @@
             [180.3, 83.2], [180.3, 83.2]
           ]
       }];
-      new Chartkick.ScatterChart("chart-scatter", scatterData, {raw: true, yTooltip: 'Length (cm)', xTooltip: 'Weight (kg)'});
+      var scatterOptions = {
+        raw: true,
+        hAxisTitle: 'Length (cm)',
+        vAxisTitle: 'Weight (kg)'
+      };
+      new Chartkick.ScatterChart("chart-scatter", scatterData, scatterOptions);
     </script>
 
     <h1>Timeline</h1>
