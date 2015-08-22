@@ -137,23 +137,23 @@
         setMax(options, opts.max);
       }
 
-      if (opts.stacked) {
+      if ("stacked" in opts) {
         setStacked(options);
       }
 
-      if (opts.colors) {
+      if ("colors" in opts) {
         options.colors = opts.colors;
       }
 
-      if (opts.dateFormat) {
+      if ("dateFormat" in opts) {
         options.dateFormat = opts.dateFormat;
       }
 
-      if (opts.hAxisTitle) {
+      if ("hAxisTitle" in opts) {
         setHAxisTitle(options, opts.hAxisTitle);
       }
 
-      if (opts.vAxisTitle) {
+      if ("vAxisTitle" in opts) {
         setVAxisTitle(options, opts.vAxisTitle);
       }
 
