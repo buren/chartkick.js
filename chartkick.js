@@ -101,7 +101,7 @@
     return false;
   }
 
-  function jsOptionsFunc(defaultOptions, hideLegend, setMin, setMax, setStacked) {
+  function jsOptionsFunc(defaultOptions, hideLegend, setMin, setMax, setStacked, setHAxisTitle, setVAxisTitle) {
     return function (series, opts, chartOptions) {
       var options = merge({}, defaultOptions);
       options = merge(options, chartOptions || {});
@@ -130,6 +130,14 @@
 
       if (opts.colors) {
         options.colors = opts.colors;
+      }
+
+      if (opts.hAxisTitle) {
+        setHAxisTitle(options, opts.hAxisTitle);
+      }
+
+      if (opts.vAxisTitle) {
+        setVAxisTitle(options, opts.vAxisTitle);
       }
 
       // merge library last
@@ -290,7 +298,15 @@
         options.plotOptions.series.stacking = "normal";
       };
 
-      var jsOptions = jsOptionsFunc(defaultOptions, hideLegend, setMin, setMax, setStacked);
+      var setHAxisTitle = function (options, title) {
+        options.xAxis = {title: {text: title}};
+      };
+
+      var setVAxisTitle = function (options, title) {
+        options.yAxis = {title: {text: title}}
+      };
+
+      var jsOptions = jsOptionsFunc(defaultOptions, hideLegend, setMin, setMax, setStacked, setHAxisTitle, setVAxisTitle);
 
       this.renderLineChart = function (chart, chartType) {
         chartType = chartType || "spline";
@@ -329,17 +345,7 @@
       };
 
       this.renderScatterChart = function (chart) {
-        var xTooltip = chart.options.xTooltip || "x";
-        var yTooltip = chart.options.yTooltip || "y";
-        var chartOptions = {
-          plotOptions: {
-            scatter: {
-              tooltip: {
-                pointFormat: xTooltip + ': <b>{point.y}</b><br/>' + yTooltip + ': <b>{point.x}</b>'
-              }
-            }
-          }
-        };
+        var chartOptions = {};
         var options = jsOptions(chart.data, chart.options, chartOptions);
         options.chart.type = 'scatter';
         options.chart.renderTo = chart.element.id;
@@ -531,7 +537,15 @@
         options.isStacked = true;
       };
 
-      var jsOptions = jsOptionsFunc(defaultOptions, hideLegend, setMin, setMax, setStacked);
+      var setHAxisTitle = function (options, title) {
+        options.hAxis = {title: title};
+      }
+
+      var setVAxisTitle = function (options, title) {
+        options.vAxis = {title: title};
+      };
+
+      var jsOptions = jsOptionsFunc(defaultOptions, hideLegend, setMin, setMax, setStacked, setHAxisTitle, setVAxisTitle);
 
       // cant use object as key
       var createDataTable = function (series, columnType) {
@@ -554,9 +568,17 @@
         }
 
         var rows2 = [];
+        var value;
         for (i in rows) {
           if (rows.hasOwnProperty(i)) {
-            rows2.push([(columnType === "datetime") ? new Date(toFloat(i)) : i].concat(rows[i]));
+            if (columnType === "datetime") {
+              value = new Date(toFloat(i));
+            } else if (columnType == "number") {
+              value = toFloat(i);
+            } else {
+              value = i;
+            }
+            rows2.push([value].concat(rows[i]));
           }
         }
         if (columnType === "datetime") {
@@ -683,7 +705,7 @@
         waitForLoaded(function () {
           var chartOptions = {};
           var options = jsOptions(chart.data, chart.options, chartOptions);
-          var data = createDataTable(chart.data, chart.options.discrete ? "string" : "datetime");
+          var data = createDataTable(chart.data, chart.options.discrete ? "number" : "datetime");
 
           chart.chart = new google.visualization.ScatterChart(chart.element);
           resize(function () {
@@ -755,7 +777,7 @@
     if (opts.raw) {
       raw = true;
       time = false;
-      opts.discrete = true;
+      opts.discrete = true; // Avoid date conversion
     }
 
     // right format
