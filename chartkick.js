@@ -977,6 +977,14 @@
     renderChart("Timeline", chart);
   }
 
+  function Repeater(callback, timeout) {
+    var self = this;
+    var update = callback;
+
+    self.runner = setInterval(function () { update(); }, timeout);
+    self.stop = function () { clearInterval(self.runner); };
+  };
+
   function setElement(chart, element, dataSource, opts, callback) {
     if (typeof element === "string") {
       element = document.getElementById(element);
@@ -986,6 +994,8 @@
     chart.dataSource = dataSource;
     Chartkick.charts[element.id] = chart;
     fetchDataSource(chart, callback);
+
+    Chartkick.setRefresh(element.id, chart.options.refresh);
   }
 
   // define classes
@@ -1017,6 +1027,18 @@
     },
     Timeline: function (element, dataSource, opts) {
       setElement(this, element, dataSource, opts, processTimelineData);
+    },
+    repeaters: {},
+    setRefresh: function(chartId, refreshInterval) {
+      if (refreshInterval && !Chartkick.repeaters[chartId]) {
+        Chartkick.repeaters[chartId] = new Repeater(function() {
+          Chartkick.updateChart(chartId);
+        }, refreshInterval);
+      }
+    },
+    stopRefresh: function(chartId) {
+      Chartkick.repeaters[chartId].stop();
+      Chartkick.repeaters[chartId] = null;
     },
     charts: {},
     updateChart: function(chartId, dataSource, opts) {

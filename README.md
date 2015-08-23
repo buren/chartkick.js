@@ -199,6 +199,15 @@ Chartkick.updateAllCharts(function(chart, isRemote) {
 });
 ```
 
+Update chart every interval
+
+```javascript
+Chartkick.updateChart('chart-1', {refresh: 30000}); // Refresh chart every 30 seconds
+Chartkick.stopRefresh('chart-1') // Stops refreshing chart-1
+Chartkick.startRefresh('chart-1', 10000) // Manually start refresh
+```
+
+
 ## Installation
 
 For Google Charts, use:
