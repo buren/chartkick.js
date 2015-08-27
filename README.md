@@ -45,6 +45,12 @@ Bar chart
 new Chartkick.BarChart("chart-1", [["Work", 32],["Play", 1492]]);
 ```
 
+Combo chart
+
+```javascript
+new Chartkick.ComboChart("chart-1", [["Work", 32],["Play", 1492]], types: ["line", "column"]);
+```
+
 Area chart
 
 ```javascript
@@ -67,6 +73,24 @@ Timeline
 
 ```javascript
 new Chartkick.Timeline("chart-1", [["Washington", "1789-04-29", "1797-03-03"],["Adams", "1797-03-03", "1801-03-03"]]);
+```
+
+Scatter chart
+
+```javascript
+var scatterData = [{
+  name: 'Female',
+  data: [[161.2, 51.6], [167.5, 59.0], [159.5, 49.2], [157.0, 63.0], [155.8, 53.6]]
+  }, {
+    name: 'Male',
+    data: [[174.0, 65.6], [175.3, 71.8], [193.5, 80.7], [186.5, 72.6], [187.2, 78.8]]
+}];
+var scatterOptions = {
+  raw: true, // Don't convert values
+  hAxisTitle: 'Length (cm)',
+  vAxisTitle: 'Weight (kg)'
+};
+new Chartkick.ScatterChart("chart-scatter", scatterData, scatterOptions);;
 ```
 
 Multiple series
@@ -117,6 +141,24 @@ Discrete axis
 new Chartkick.LineChart("chart-1", data, {"discrete": true});
 ```
 
+Date format (@buren fork)
+
+```javascript
+new Chartkick.LineChart("chart-1", data, {"dateFormat": 'yyyy-MM-dd'});
+```
+
+Horizontal axis title (@buren fork)
+
+```javascript
+new Chartkick.LineChart("chart-1", data, {hAxisTitle: "Created at"});
+```
+
+Vertical axis title (@buren fork)
+
+```javascript
+new Chartkick.LineChart("chart-1", data, {vAxisTitle: "Count"});
+```
+
 You can pass options directly to the charting library with:
 
 ```javascript
@@ -137,6 +179,40 @@ Times can be a `Date`, a timestamp, or a string (strings are parsed)
 ```javascript
 new Chartkick.LineChart("chart-1", [[new Date(), 5],[1368174456, 4],["2013-05-07 00:00:00 UTC", 7]]);
 ```
+
+### Update charts (@buren fork)
+
+Single chart:
+```javascript
+Chartkick.updateChart('chart-1'); // Update chart-1 (assumes that chart-1 has a remote URL)
+Chartkick.updateChart('chart-1', data); // Update chart-1 with data
+Chartkick.updateChart('chart-1', null, {colors: ['red', 'green']}); // Update chart-1, from current dataSource but with new options
+```
+
+All charts:
+```javascript
+Chartkick.updateAllCharts(); // Updates all charts with remote URLs
+Chartkick.updateAllCharts(function(chart, isRemote) {
+  if (isRemote) {
+    return {data: chart.dataSource + '?some_param=abc'};
+  }
+});
+// Update all charts with new options (charts with remote URL with re-fetch their data)
+Chartkick.updateAllCharts(function(chart, isRemote) {
+  return {
+    options: {colors: ['red', 'green']}
+  };
+});
+```
+
+Update chart every interval
+
+```javascript
+Chartkick.updateChart('chart-1', {refresh: 30000}); // Refresh chart every 30 seconds
+Chartkick.stopRefresh('chart-1') // Stops refreshing chart-1
+Chartkick.startRefresh('chart-1', 10000) // Manually start refresh
+```
+
 
 ## Installation
 
@@ -171,6 +247,23 @@ To specify a language for Google Charts, add:
 ```html
 <script>
   var Chartkick = {"language": "de"};
+</script>
+```
+
+**before** the javascript files.
+
+### LineChart configuration (@buren fork)
+
+To specify defaults, add:
+
+```html
+<script>
+  var Chartkick = {
+    "language": "de", // Google Charts language
+    lineChart: {
+      marker: { maxPoints: 10 } // Don't display markers if there are more than 10 data points
+    }
+  };
 </script>
 ```
 
