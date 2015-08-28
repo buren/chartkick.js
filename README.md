@@ -75,6 +75,20 @@ Timeline
 new Chartkick.Timeline("chart-1", [["Washington", "1789-04-29", "1797-03-03"],["Adams", "1797-03-03", "1801-03-03"]]);
 ```
 
+Heatmap (Highcharts only)
+
+```javascript
+new Chartkick.Heatmap("chart-heatmap", [[0, 0, 10], [1, 1, 20]]);
+```
+
+Calendar heatmap
+
+```javascript
+new Chartkick.Heatmap("chart-heatmap-date", [[new Date(2015, 1, 1), 10], [new Date(2015, 0, 2), 20], [new Date(2015, 2, 3), 7]], {dataType: "weekdays"});
+```
+
+supported `dataType`s are `months/weekdays`
+
 Multiple series
 
 ```javascript

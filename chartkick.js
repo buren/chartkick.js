@@ -17,7 +17,9 @@
       marker: {
         maxPoints: Infinity
       }
-    }
+    },
+    months: ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"],
+    weekdays: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
   };
 
   var config = merge(DEFAULT_OPTIONS, window.Chartkick || {});
@@ -375,6 +377,46 @@
         var chartOptions = {};
         var options = jsOptions(chart.data, chart.options, chartOptions);
         options.chart.type = 'scatter';
+        options.chart.renderTo = chart.element.id;
+        options.series = chart.data;
+        new Highcharts.Chart(options);
+      };
+
+      this.renderHeatmap = function (chart) {
+        var ycategories = chart.options.ycategories;
+        var xcategories = chart.options.xcategories;
+        var dataType = chart.options.dataType;
+        if (!ycategories) {
+          if (dataType === 'weekdays') {
+            ycategories = config.weekdays;
+          } else if (dataType === 'months') {
+            ycategories = config.months;
+          }
+        }
+        var chartOptions = {
+          colorAxis: {
+            min: 0,
+            minColor: '#FFFFFF',
+            maxColor: Highcharts.getOptions().colors[0]
+          },
+          tooltip: {
+            formatter: function () {
+              var yPoint = this.series.yAxis.categories[this.point.y];
+              var xPoint = this.series.xAxis.categories[this.point.x] || 'Value';
+              var label = '';
+              if (yPoint) {
+                label += '<b>' + yPoint + '</b><br>';
+              }
+              label += '<b>' + xPoint + '</b>: <b>' + this.point.value + '</b>'
+              return label;
+            }
+          },
+          yAxis: { categories: ycategories },
+          xAxis: { categories: xcategories }
+        };
+
+        var options = jsOptions(chart.data, chart.options, chartOptions);
+        options.chart.type = 'heatmap';
         options.chart.renderTo = chart.element.id;
         options.series = chart.data;
         new Highcharts.Chart(options);
@@ -849,6 +891,20 @@
           });
         });
       };
+
+      this.renderHeatmap = function (chart) {
+        // FIXME: For some reason the callback for waitForLoaded never gets called
+        waitForLoaded("calendar", function () {
+          var chartOptions = {};
+          var options = jsOptions(chart.data, chart.options, chartOptions);
+          var data = createDataTable(chart.data, "number");
+
+          chart.chart = new google.visualization.Calendar(chart.element);
+          resize(function () {
+            chart.chart.draw(data, options);
+          });
+        });
+      };
     };
 
     adapters.push(GoogleChartsAdapter);
@@ -895,16 +951,22 @@
     return r;
   };
 
-  function processSeries(series, opts, keyType) {
-    var i;
-
-    // see if one series or multiple
+  var normalizeSeries = function (series, opts) {
     if (!isArray(series) || typeof series[0] !== "object" || isArray(series[0])) {
       series = [{name: "Value", data: series}];
       opts.hideLegend = true;
     } else {
       opts.hideLegend = false;
     }
+    return series;
+  };
+
+  function processSeries(series, opts, keyType) {
+    var i;
+
+    // see if one series or multiple
+    series = normalizeSeries(series, opts);
+
     if (opts.discrete) {
       keyType = "string";
     }
@@ -933,6 +995,27 @@
       data[i][2] = toDate(data[i][2]);
     }
     return data;
+  }
+
+  function processHeatmap(series, opts) {
+    var i, j, data, point, yvalue;
+    var dataType = opts.dataType;
+    series = normalizeSeries(series, opts);
+    for (i = 0; i < series.length; i++) {
+      data = series[i].data;
+      for (j = 0; j < data.length; j++) {
+        point = data[j];
+        yvalue = point[0];
+        if (dataType === "weekdays") {
+          yvalue = yvalue.getDay();
+        } else if (dataType === 'months') {
+          yvalue = yvalue.getMonth();
+        }
+        data[j] = [i, yvalue, point[1]];
+      }
+      series[i].dataLabels = { enabled: true };
+    }
+    return series;
   }
 
   function processLineData(chart) {
@@ -978,6 +1061,11 @@
   function processTimelineData(chart) {
     chart.data = processTime(chart.data);
     renderChart("Timeline", chart);
+  }
+
+  function processHeatmapData(chart) {
+    chart.data = processHeatmap(chart.data, chart.options);
+    renderChart("Heatmap", chart);
   }
 
   function Repeater(callback, timeout) {
@@ -1030,6 +1118,9 @@
     },
     Timeline: function (element, dataSource, opts) {
       setElement(this, element, dataSource, opts, processTimelineData);
+    },
+    Heatmap: function (element, dataSource, opts) {
+      setElement(this, element, dataSource, opts, processHeatmapData);
     },
     repeaters: {},
     setRefresh: function(chartId, refreshInterval) {
