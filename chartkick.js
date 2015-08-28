@@ -376,16 +376,6 @@
         var options = jsOptions(chart.data, chart.options, chartOptions);
         options.chart.type = 'scatter';
         options.chart.renderTo = chart.element.id;
-        var data = chart.data;
-        options.series = chart.data;
-        new Highcharts.Chart(options);
-      };
-
-      this.renderScatterChart = function (chart) {
-        var chartOptions = {};
-        var options = jsOptions(chart.data, chart.options, chartOptions);
-        options.chart.type = 'scatter';
-        options.chart.renderTo = chart.element.id;
         options.series = chart.data;
         new Highcharts.Chart(options);
       };
