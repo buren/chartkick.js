@@ -75,24 +75,6 @@ Timeline
 new Chartkick.Timeline("chart-1", [["Washington", "1789-04-29", "1797-03-03"],["Adams", "1797-03-03", "1801-03-03"]]);
 ```
 
-Scatter chart
-
-```javascript
-var scatterData = [{
-  name: 'Female',
-  data: [[161.2, 51.6], [167.5, 59.0], [159.5, 49.2], [157.0, 63.0], [155.8, 53.6]]
-  }, {
-    name: 'Male',
-    data: [[174.0, 65.6], [175.3, 71.8], [193.5, 80.7], [186.5, 72.6], [187.2, 78.8]]
-}];
-var scatterOptions = {
-  raw: true, // Don't convert values
-  hAxisTitle: 'Length (cm)',
-  vAxisTitle: 'Weight (kg)'
-};
-new Chartkick.ScatterChart("chart-scatter", scatterData, scatterOptions);;
-```
-
 Multiple series
 
 ```javascript
