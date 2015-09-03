@@ -15,7 +15,8 @@
     <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
 
     <!-- <script src="http://cdnjs.cloudflare.com/ajax/libs/zepto/1.1.2/zepto.min.js"></script> -->
-    <!-- <script src="http://code.highcharts.com/highcharts.js"></script> -->
+    <script src="http://code.highcharts.com/highcharts.js"></script>
+    <script src="http://code.highcharts.com/modules/heatmap.js"></script>
     <!-- <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script> -->
     <!-- <script src="http://code.highcharts.com/2.1.9/highcharts.js"></script> -->
     <script src="../chartkick.js"></script>
@@ -33,6 +34,37 @@
     </style>
   </head>
   <body>
+    <h1>Heatmap - Single</h1>
+    <div id="chart-heatmap-single" style="height: 300px;"></div>
+    <script>
+      new Chartkick.Heatmap("chart-heatmap-single", [[0, 0, 10], [0, 1, 20]]);
+    </script>
+    <h1>Heatmap - Multi</h1>
+    <div id="chart-heatmap-multi" style="height: 300px;"></div>
+    <script>
+      new Chartkick.Heatmap("chart-heatmap-multi", [{name: "First", data: [[0, 0, 10], [0, 1, 20]]}, {name: "Second", data: [[1, 0, 6], [1, 1, 12]]}]);
+    </script>
+
+    <h1>Heatmap - Calendar</h1>
+    <div id="chart-heatmap-calendar" style="height: 300px;"></div>
+    <script>
+      var heatData = [{
+        name: "Marie",
+        data: [["2015-01-01", 10], ["2015-01-02", 20], ["2015-02-03", 7]]
+      }, {
+        name: "Lucas",
+        data: [["2015-01-01", 8], ["2015-01-02", 12], ["2015-02-07", 46]]
+      }];
+      new Chartkick.Heatmap("chart-heatmap-calendar", heatData, {dataType: "weekdays"});
+    </script>
+
+    <h1>Heatmap - Calendar (Google)</h1>
+    <div id="chart-heatmap-calendar-google" style="height: 300px;"></div>
+    <script>
+      var heatData = [[new Date(2015, 1, 1), 10], [new Date(2015, 0, 2), 20], [new Date(2015, 2, 3), 7]];
+      new Chartkick.Heatmap("chart-heatmap-calendar-google", heatData, {adapter: "google"});
+    </script>
+
     <h1>Line Chart</h1>
     <div id="chart-1" style="height: 300px;"></div>
     <script>

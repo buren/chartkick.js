@@ -17,6 +17,16 @@
       marker: {
         maxPoints: Infinity
       }
+    },
+    months: ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"],
+    weekdays: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"],
+    dayOfMonth: function() {
+      var i;
+      var dayNumbers = [];
+      for (i = 0; i < 32; i++) {
+        dayNumbers.push(i);
+      }
+      return dayNumbers;
     }
   };
 
@@ -380,6 +390,60 @@
         new Highcharts.Chart(options);
       };
 
+      var buildHeatmapYcategories = function(dataType) {
+        var categories;
+        if (dataType === "weekdays") {
+          categories = config.weekdays;
+        } else if (dataType === "months") {
+          categories = config.months;
+        } else if (dataType === "dayOfMonth") {
+          categories = config.dayOfMonth;
+        }
+        return categories;
+      };
+
+      var getHeatmapChartOptions = function(xcategories, ycategories) {
+        return {
+          colorAxis: {
+            min: 0
+          }, tooltip: {
+            formatter: function () {
+              var yPoint = this.series.yAxis.categories[this.point.y];
+              var xPoint = this.series.xAxis.categories[this.point.x] || "Value";
+              var label = "";
+              if (yPoint) {
+                label += "<b>" + yPoint + "</b><br>";
+              }
+              label += "<b>" + xPoint + "</b>: <b>" + this.point.value + "</b>"
+              return label;
+            }
+          },
+          yAxis: { categories: ycategories },
+          xAxis: { categories: xcategories }
+        };
+      };
+
+      var buildHeatmapXcategories = function(chartData) {
+        var categories = [];
+        for (var i = 0; i < chartData.length; i++) {
+          categories.push(chartData[i].name);
+        }
+        return categories;
+      };
+
+      this.renderHeatmap = function (chart) {
+        var dataType = chart.options.dataType;
+        var ycategories = chart.options.ycategories || buildHeatmapYcategories(dataType);
+        var xcategories = chart.options.xcategories || buildHeatmapXcategories(chart.data);
+
+        var chartOptions = getHeatmapChartOptions(xcategories, ycategories);
+        var options = jsOptions(chart.data, chart.options, chartOptions);
+        options.chart.type = "heatmap";
+        options.chart.renderTo = chart.element.id;
+        options.series = chart.data;
+        new Highcharts.Chart(options);
+      };
+
       this.renderPieChart = function (chart) {
         var chartOptions = {};
         if (chart.options.colors) {
@@ -510,7 +574,7 @@
         var cb, call;
         for (var i = 0; i < callbacks.length; i++) {
           cb = callbacks[i];
-          call = google.visualization && ((cb.pack === "corechart" && google.visualization.LineChart) || (cb.pack === "timeline" && google.visualization.Timeline))
+          call = google.visualization && ((cb.pack === "corechart" && google.visualization.LineChart) || (cb.pack === "timeline" && google.visualization.Timeline) || (cb.pack === "calendar" && google.visualization.Calendar))
           if (call) {
             cb.callback();
             callbacks.splice(i, 1);
@@ -849,6 +913,23 @@
           });
         });
       };
+
+      this.renderHeatmap = function (chart) {
+        waitForLoaded("calendar", function () {
+          var chartOptions = {};
+          var options = merge(merge(defaultOptions, chartOptions), chart.options.library || {});
+
+          var data = new google.visualization.DataTable();
+          data.addColumn({ type: "date", id: "Date" });
+          data.addColumn({ type: "number", id: "Value" });
+          data.addRows(chart.data[0].data);
+
+          chart.chart = new google.visualization.Calendar(chart.element);
+          resize(function () {
+            chart.chart.draw(data, options);
+          });
+        });
+      };
     };
 
     adapters.push(GoogleChartsAdapter);
@@ -895,16 +976,22 @@
     return r;
   };
 
-  function processSeries(series, opts, keyType) {
-    var i;
-
-    // see if one series or multiple
+  var normalizeSeries = function (series, opts) {
     if (!isArray(series) || typeof series[0] !== "object" || isArray(series[0])) {
       series = [{name: "Value", data: series}];
       opts.hideLegend = true;
     } else {
       opts.hideLegend = false;
     }
+    return series;
+  };
+
+  function processSeries(series, opts, keyType) {
+    var i;
+
+    // see if one series or multiple
+    series = normalizeSeries(series, opts);
+
     if (opts.discrete) {
       keyType = "string";
     }
@@ -933,6 +1020,31 @@
       data[i][2] = toDate(data[i][2]);
     }
     return data;
+  }
+
+  function processHeatmap(series, opts) {
+    var i, j, data, point, yvalue;
+    var dataType = opts.dataType;
+    series = normalizeSeries(series, opts);
+    for (i = 0; i < series.length; i++) {
+      data = series[i].data;
+      for (j = 0; j < data.length; j++) {
+        if (dataType) {
+          point = data[j];
+          yvalue = toDate(point[0]);
+          if (dataType === "weekdays") {
+            yvalue = yvalue.getDay();
+          } else if (dataType === "months") {
+            yvalue = yvalue.getMonth();
+          } else if (dataType === "dayOfMonth") {
+            yvalue = yvalue.getDate();
+          }
+          data[j] = [i, yvalue, point[1]];
+        }
+      }
+      series[i].dataLabels = { enabled: true };
+    }
+    return series;
   }
 
   function processLineData(chart) {
@@ -978,6 +1090,11 @@
   function processTimelineData(chart) {
     chart.data = processTime(chart.data);
     renderChart("Timeline", chart);
+  }
+
+  function processHeatmapData(chart) {
+    chart.data = processHeatmap(chart.data, chart.options);
+    renderChart("Heatmap", chart);
   }
 
   function Repeater(callback, timeout) {
@@ -1030,6 +1147,9 @@
     },
     Timeline: function (element, dataSource, opts) {
       setElement(this, element, dataSource, opts, processTimelineData);
+    },
+    Heatmap: function (element, dataSource, opts) {
+      setElement(this, element, dataSource, opts, processHeatmapData);
     },
     repeaters: {},
     setRefresh: function(chartId, refreshInterval) {
