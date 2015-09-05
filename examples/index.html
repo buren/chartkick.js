@@ -204,7 +204,7 @@
     </script>
 
     <h1 id="playground">Playground</h1>
-    <label>Data points:</label>
+    <label>Number of points:</label>
     <input id="chart-points" type="number" min="0" value="10">
     <select id="chart-type">
       <option value="LineChart" selected="true">LineChart</option>
@@ -218,18 +218,27 @@
       <option value="highcharts">Highcharts</option>
     </select>
     <span id="chart-demo-note"></span>
+    <br>
+    <div id="marker-points-area">
+      <label>Max marker points:</label>
+      <input id="chart-max-marker-points" type="number" min="0" placeholder="Default: Infinity">
+    </div>
     <div id="chart-demo" style="height: 300px;"></div>
     <script>
       var ChartDemo = function(id) {
         var self = this;
         self.id = id;
 
-        self._createChart = function(type, data, adapter) {
-          new Chartkick[type](self.id, data, {"adapter": adapter});
+        self._createChart = function(type, data, adapter, maxMarkerPoints) {
+          var options = {
+            adapter: adapter,
+            maxMarkerPoints: maxMarkerPoints || Infinity
+          };
+          new Chartkick[type](self.id, data, options);
         };
 
-        self.chart = function(chartType, nbrOfPoints, adapter) {
-          self._createChart(chartType, self.dataGenerator(nbrOfPoints), adapter);
+        self.chart = function(chartType, nbrOfPoints, adapter, maxMarkerPoints) {
+          self._createChart(chartType, self.dataGenerator(nbrOfPoints), adapter, maxMarkerPoints);
         };
 
         self.dataGenerator = function(nbrOfPoints) {
@@ -256,12 +265,20 @@
       var pointsInput = document.getElementById("chart-points");
       var typeInput = document.getElementById("chart-type");
       var adapterInput = document.getElementById("chart-adapter");
+      var markerPointsInput = document.getElementById("chart-max-marker-points");
+
       var adapters = adapterInput.getElementsByTagName("option");
 
       var setChart = function() {
         try {
           adapterInput.setAttribute("testedAdapters", adapterInput.value);
-          demo.chart(typeInput.value, pointsInput.value, adapterInput.value);
+          demo.chart(typeInput.value, pointsInput.value, adapterInput.value, markerPointsInput.value);
+          var maxMarkerArea = document.getElementById("marker-points-area")
+          if (typeInput.value === 'LineChart') {
+            maxMarkerArea.style.visibility = 'visible';
+          } else {
+            maxMarkerArea.style.visibility = 'hidden';
+          }
         } catch (e) {
           var notice = document.getElementById("chart-demo-note");
           notice.style.color = "#ff0000";
@@ -282,6 +299,7 @@
       pointsInput.onchange = setChart;
       typeInput.onchange = setChart;
       adapterInput.onchange = setChart;
+      markerPointsInput.onchange = setChart;
       setChart();
     </script>
   </body>
