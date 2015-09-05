@@ -349,6 +349,12 @@
         options.chart.type = chartType;
         options.chart.renderTo = chart.element.id;
 
+        if (options.dateFormat) {
+          options.xAxis.labels.formatter = function () {
+            return Highcharts.dateFormat(options.dateFormat, this.value);
+          };
+        }
+
         var series = chart.data;
         var maxMarkerPoints;
         for (i = 0; i < series.length; i++) {
@@ -365,11 +371,6 @@
           };
         }
         options.series = series;
-        if (options.dateFormat) {
-          options.xAxis.labels.formatter = function (){
-            return Highcharts.dateFormat(options.dateFormat, this.value);
-          };
-        }
         new Highcharts.Chart(options);
       };
 

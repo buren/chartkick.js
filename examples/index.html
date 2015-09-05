@@ -217,6 +217,7 @@
       <option value="google" selected="true">Google</option>
       <option value="highcharts">Highcharts</option>
     </select>
+    <span id="chart-demo-note"></span>
     <div id="chart-demo" style="height: 300px;"></div>
     <script>
       var ChartDemo = function(id) {
@@ -250,14 +251,33 @@
         };
       };
 
-      var demo = new ChartDemo('chart-demo');
+      var demo = new ChartDemo("chart-demo");
 
-      var pointsInput = document.getElementById('chart-points');
-      var typeInput = document.getElementById('chart-type');
-      var adapterInput = document.getElementById('chart-adapter');
+      var pointsInput = document.getElementById("chart-points");
+      var typeInput = document.getElementById("chart-type");
+      var adapterInput = document.getElementById("chart-adapter");
+      var adapters = adapterInput.getElementsByTagName("option");
 
       var setChart = function() {
-        demo.chart(typeInput.value, pointsInput.value, adapterInput.value);
+        try {
+          adapterInput.setAttribute("testedAdapters", adapterInput.value);
+          demo.chart(typeInput.value, pointsInput.value, adapterInput.value);
+        } catch (e) {
+          var notice = document.getElementById("chart-demo-note");
+          notice.style.color = "#ff0000";
+          notice.innerHTML = "<i>Note</i>: " + adapterInput.value + " adapter could not be used."
+          var adapter, i, testedAdapters;
+          for (i = 0; i < adapters.length; i++) {
+            adapter = adapters[i].value;
+            testedAdapters = adapterInput.getAttribute("testedAdapters");
+            // Try with another adapted unless its already been tried
+            if (adapter !== adapterInput.value && testedAdapters.indexOf(adapter) === -1) {
+              adapterInput.value = adapter;
+              adapterInput.setAttribute("testedAdapters", testedAdapters + ", " + adapter);
+              setChart();
+            }
+          }
+        }
       };
       pointsInput.onchange = setChart;
       typeInput.onchange = setChart;
