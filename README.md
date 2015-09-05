@@ -123,28 +123,22 @@ Discrete axis
 new Chartkick.LineChart("chart-1", data, {"discrete": true});
 ```
 
-Date format (@buren fork)
+Axis titles
 
 ```javascript
-new Chartkick.LineChart("chart-1", data, {"dateFormat": 'yyyy-MM-dd'});
-```
-
-Horizontal axis title (@buren fork)
-
-```javascript
-new Chartkick.LineChart("chart-1", data, {hAxisTitle: "Created at"});
-```
-
-Vertical axis title (@buren fork)
-
-```javascript
-new Chartkick.LineChart("chart-1", data, {vAxisTitle: "Count"});
+new Chartkick.LineChart("chart-1", data, {"xtitle": "Horizontal", "ytitle": "Vertical"});
 ```
 
 You can pass options directly to the charting library with:
 
 ```javascript
 new Chartkick.LineChart("chart-1", data, {"library": {"backgroundColor": "pink"}});
+```
+
+Date format (@buren fork)
+
+```javascript
+new Chartkick.LineChart("chart-1", data, {"dateFormat": 'yyyy-MM-dd'});
 ```
 
 ### Data

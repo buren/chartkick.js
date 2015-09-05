@@ -1,15 +1,16 @@
 ## 1.4.0-buren
 
-- `ComboChart` support
-- `ScatterChart` support
-- `Chartkick.updateChart` and `Chartkick.updateAllCharts` methods
-- `Chartkick.setRefresh` and `Chartkick.stopRefresh` methods
-- `refresh` option
-- `dateFormat` option
-- `hAxisTitle` option
-- `vAxisTitle` option
-- `raw` option for disabling all type conversions of data points
-- `Chartkick.lineChart.marker.maxPoints` option
+- Added `ComboChart` support
+- Added `Chartkick.updateChart` and `Chartkick.updateAllCharts` methods
+- Added `Chartkick.setRefresh` and `Chartkick.stopRefresh` methods
+- Added `refresh` option
+- Added `dateFormat` option
+- Added `Chartkick.lineChart.marker.maxPoints` option
+
+## 1.4.0
+
+- Added scatter chart
+- Added axis titles
 
 ## 1.3.0
 
