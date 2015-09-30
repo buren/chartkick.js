@@ -85,7 +85,7 @@ data = [
 new Chartkick.LineChart("chart-1", data);
 ```
 
-Heatmap (Highcharts)
+Heatmap (Highcharts) (@buren fork)
 
 _Note_: Heat maps require the [modules/heatmap.js](http://code.highcharts.com/modules/heatmap.js) file to be loaded.
 
@@ -114,13 +114,13 @@ new Chartkick.Heatmap("chart-1", data, {groupBy: "weekdays"});
 
 _Required_: Specify what to group dates on: `months/weekdays/days`.
 
-Calendar (Google)
+Calendar (Google) (@buren fork)
 
 ```javascript
 new Chartkick.Calendar("chart-1", [["2015-02-01", 10], ["2015-01-02", 20], ["2015-03-03", 7]]);
 ```
 
-Gauge (Google)
+Gauge (Google) (@buren fork)
 
 ```javascript
 new Chartkick.Gauge("chart-gauge", [['Memory', 80], ['CPU', 55], ['Network', 68]]);
@@ -310,7 +310,8 @@ Chartkick uses [iso8601.js](https://github.com/Do/iso8601.js) to parse dates and
 
 ## History
 
-View the [changelog](https://github.com/ankane/chartkick.js/blob/master/CHANGELOG.md)
+View the [changelog](CHANGELOG.md)
+View the @buren fork [changelog](CHANGELOG-buren.md)
 
 Chartkick.js follows [Semantic Versioning](http://semver.org/)
 

@@ -2,15 +2,6 @@
 
 - Fixed regression with `min: null`
 
-## 1.4.0-buren
-
-- Added `ComboChart` support
-- Added `Chartkick.updateChart` and `Chartkick.updateAllCharts` methods
-- Added `Chartkick.setRefresh` and `Chartkick.stopRefresh` methods
-- Added `refresh` option
-- Added `dateFormat` option
-- Added `Chartkick.lineChart.marker.maxPoints` option
-
 ## 1.4.0
 
 - Added scatter chart

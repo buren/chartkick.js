@@ -3,7 +3,7 @@
  * Create beautiful Javascript charts with minimal code
  * https://github.com/ankane/chartkick.js
  * v1.4.1
- * v1.4.0-buren
+ * v1.5.0-buren
  * MIT License
  */
 
