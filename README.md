@@ -120,6 +120,12 @@ Calendar (Google)
 new Chartkick.Calendar("chart-1", [["2015-02-01", 10], ["2015-01-02", 20], ["2015-03-03", 7]]);
 ```
 
+Gauge (Google)
+
+```javascript
+new Chartkick.Gauge("chart-gauge", [['Memory', 80], ['CPU', 55], ['Network', 68]]);
+```
+
 ### Say Goodbye To Timeouts
 
 Make your pages load super fast and stop worrying about timeouts.  Give each chart its own endpoint.
