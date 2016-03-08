@@ -733,9 +733,16 @@
         return data;
       };
 
+      var oneTimeEvent = function (node, type, callback) {
+        node.addEventListener(type, function(e) {
+          e.target.removeEventListener(e.type, arguments.callee);
+          return callback(e);
+        });
+      }
+
       var resize = function (callback) {
         if (window.attachEvent) {
-          window.attachEvent("onresize", callback);
+          oneTimeEvent(window, 'onresize', callback)
         } else if (window.addEventListener) {
           window.addEventListener("resize", callback, true);
         }
